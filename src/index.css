@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
+@import "tailwindcss";
+@source "./**/*.{js,jsx,ts,tsx}";
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #f5f0e8;
+  color: #2c2416;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ede8dc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d6a5a;
+  border-radius: 10px;
+}
+
+/* Card Flip Effect */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
