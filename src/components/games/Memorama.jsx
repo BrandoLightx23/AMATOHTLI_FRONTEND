@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, useRef } from "react"
 import { AppContext } from "../../context/AppContext"
+import { useLanguage } from "../../context/useLanguage"
 import { getImageUrl } from "../../api/api"
 import { RefreshCw, Clock, Award, Star, ArrowLeft } from "lucide-react"
 
@@ -19,6 +20,7 @@ function CardBackSVG() {
 
 export default function Memorama() {
   const { allObjects, setActiveGame } = useContext(AppContext)
+  const { t } = useLanguage()
   const [difficulty, setDifficulty] = useState(null) // null, 'facil', 'medio', 'dificil'
   const [cards, setCards] = useState([])
   const [selected, setSelected] = useState([]) // indices of currently flipped cards
@@ -31,9 +33,9 @@ export default function Memorama() {
 
   // Opciones de dificultad
   const config = {
-    facil: { pairs: 6, gridClass: "grid-cols-3 md:grid-cols-4" },
-    medio: { pairs: 10, gridClass: "grid-cols-4 md:grid-cols-5" },
-    dificil: { pairs: 15, gridClass: "grid-cols-5 md:grid-cols-6" }
+    facil: { pairs: 6, gridClass: "grid-cols-3 sm:grid-cols-4" },
+    medio: { pairs: 10, gridClass: "grid-cols-4 sm:grid-cols-5" },
+    dificil: { pairs: 15, gridClass: "grid-cols-5 sm:grid-cols-6" }
   }
 
   // Iniciar temporizador cuando se escoge la dificultad
@@ -76,8 +78,8 @@ export default function Memorama() {
       const cardBase = {
         id: `${obj.id}-${index}-a`,
         objectId: obj.id,
-        titulo: obj.titulo || "Objeto Prehispánico",
-        cultura: obj.estilo_cultura || "Mesoamérica",
+        titulo: obj.titulo,
+        cultura: obj.estilo_cultura,
         image: getImageUrl(obj, true) || "/placeholder.svg"
       }
       gameCards.push({ ...cardBase, cardId: `${obj.id}-a` })
@@ -139,45 +141,45 @@ export default function Memorama() {
   return (
     <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-6" style={{ background: "#f5f0e8" }}>
       {/* Botón de retroceso */}
-      <div className="w-full max-w-4xl flex justify-between items-center mb-6">
+      <div className="w-full max-w-4xl flex flex-col sm:flex-row sm:justify-between items-center gap-3 mb-6">
         <button
           onClick={() => setActiveGame(null)}
-          className="flex items-center gap-2 text-[#2d6a5a] hover:text-[#1e4d40] font-semibold text-sm transition-colors cursor-pointer"
+          className="self-start sm:self-auto flex items-center gap-2 text-[#2d6a5a] hover:text-[#1e4d40] font-semibold text-sm transition-colors cursor-pointer"
         >
           <ArrowLeft size={16} />
-          Volver a Juegos
+          {t("game.back")}
         </button>
-        <h2 className="text-2xl font-black text-[#2d6a5a] tracking-wider" style={{ fontFamily: "'Playfair Display', serif" }}>
-          MEMORAMA PREHISPÁNICO
+        <h2 className="text-xl sm:text-2xl text-center font-black text-[#2d6a5a] tracking-wider" style={{ fontFamily: "'Playfair Display', serif" }}>
+          {t("mem.title")}
         </h2>
-        <div className="w-20"></div> {/* Espaciador */}
+        <div className="hidden sm:block w-20"></div> {/* Espaciador */}
       </div>
 
       {!difficulty ? (
         // Pantalla de selección de dificultad
         <div className="w-full max-w-md bg-white border border-[#d9d0bc] rounded-2xl p-8 shadow-md text-center mt-12">
           <Award size={48} className="text-[#c9830a] mx-auto mb-4 animate-bounce" />
-          <h3 className="text-xl font-bold text-[#2d6a5a] mb-2">Selecciona la Dificultad</h3>
-          <p className="text-sm text-[#7a6e5f] mb-6">Encuentra los pares de objetos prehispánicos de la colección.</p>
+          <h3 className="text-xl font-bold text-[#2d6a5a] mb-2">{t("mem.selectDifficulty")}</h3>
+          <p className="text-sm text-[#7a6e5f] mb-6">{t("mem.intro")}</p>
 
           <div className="flex flex-col gap-3">
             <button
               onClick={() => startGame("facil")}
               className="py-3.5 px-6 rounded-xl bg-[#eaf0ec] hover:bg-[#d5e4dd] text-[#2d6a5a] font-bold text-sm transition-colors border border-[#2d6a5a]/20 cursor-pointer"
             >
-              Fácil (6 Pares — 12 Cartas)
+              {t("mem.easy")}
             </button>
             <button
               onClick={() => startGame("medio")}
               className="py-3.5 px-6 rounded-xl bg-[#fff6e6] hover:bg-[#ffeed1] text-[#c9830a] font-bold text-sm transition-colors border border-[#c9830a]/20 cursor-pointer"
             >
-              Medio (10 Pares — 20 Cartas)
+              {t("mem.medium")}
             </button>
             <button
               onClick={() => startGame("dificil")}
               className="py-3.5 px-6 rounded-xl bg-[#fdf2ee] hover:bg-[#fadcd0] text-[#b85c38] font-bold text-sm transition-colors border border-[#b85c38]/20 cursor-pointer"
             >
-              Difícil (15 Pares — 30 Cartas)
+              {t("mem.hard")}
             </button>
           </div>
         </div>
@@ -185,27 +187,27 @@ export default function Memorama() {
         // Pantalla del Juego
         <div className="w-full max-w-4xl flex flex-col items-center">
           {/* Marcadores */}
-          <div className="w-full bg-[#ede8dc] border border-[#d9d0bc] rounded-xl px-6 py-4 flex flex-wrap justify-between items-center gap-4 mb-6 shadow-sm">
+          <div className="w-full bg-[#ede8dc] border border-[#d9d0bc] rounded-xl px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-between items-center gap-3 sm:gap-4 mb-6 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="text-[#7a6e5f] text-xs font-semibold uppercase tracking-wider">Dificultad:</span>
+              <span className="text-[#7a6e5f] text-xs font-semibold uppercase tracking-wider">{t("mem.difficulty")}</span>
               <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
                 difficulty === "facil" ? "bg-[#eaf0ec] text-[#2d6a5a]" :
                 difficulty === "medio" ? "bg-[#fff6e6] text-[#c9830a]" :
                 "bg-[#fdf2ee] text-[#b85c38]"
-              }`}>{difficulty}</span>
+              }`}>{t(`diff.${difficulty}`)}</span>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 sm:gap-6">
               <div className="flex items-center gap-2 text-[#2d6a5a]">
                 <Clock size={16} />
                 <span className="font-mono font-bold text-lg">{formatTime(seconds)}</span>
               </div>
               <div className="flex items-center gap-2 text-[#c9830a]">
                 <Star size={16} />
-                <span className="font-bold text-lg">{score} pts</span>
+                <span className="font-bold text-lg whitespace-nowrap">{t("game.pts", { n: score })}</span>
               </div>
               <div className="text-[#7a6e5f] font-semibold text-sm">
-                Movimientos: <span className="text-[#2c2416] font-bold">{moves}</span>
+                {t("game.moves")} <span className="text-[#2c2416] font-bold">{moves}</span>
               </div>
             </div>
 
@@ -214,7 +216,7 @@ export default function Memorama() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2d6a5a] text-white hover:bg-[#1e4d40] text-xs font-bold transition-colors shadow-sm cursor-pointer"
             >
               <RefreshCw size={13} />
-              Reiniciar
+              {t("game.restart")}
             </button>
           </div>
 
@@ -225,22 +227,22 @@ export default function Memorama() {
                 <Star size={36} fill="#c9830a" />
               </div>
               <h3 className="text-2xl font-black text-[#2d6a5a] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                ¡Victoria Prehispánica!
+                {t("mem.winTitle")}
               </h3>
-              <p className="text-sm text-[#7a6e5f] mb-6">Has encontrado todos los pares de la colección del museo.</p>
+              <p className="text-sm text-[#7a6e5f] mb-6">{t("mem.winText")}</p>
 
               <div className="bg-[#f5f0e8] rounded-xl p-4 mb-6 text-left flex flex-col gap-2.5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#7a6e5f]">Tiempo total:</span>
+                  <span className="text-[#7a6e5f]">{t("game.totalTime")}</span>
                   <span className="font-bold text-[#2c2416]">{formatTime(seconds)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#7a6e5f]">Movimientos:</span>
+                  <span className="text-[#7a6e5f]">{t("game.moves")}</span>
                   <span className="font-bold text-[#2c2416]">{moves}</span>
                 </div>
                 <div className="flex justify-between text-sm border-t border-[#d9d0bc] pt-2">
-                  <span className="text-[#7a6e5f] font-bold">Puntuación Final:</span>
-                  <span className="font-bold text-[#c9830a] text-lg">{score} pts</span>
+                  <span className="text-[#7a6e5f] font-bold">{t("game.finalScore")}</span>
+                  <span className="font-bold text-[#c9830a] text-lg">{t("game.pts", { n: score })}</span>
                 </div>
               </div>
 
@@ -249,19 +251,19 @@ export default function Memorama() {
                   onClick={() => setDifficulty(null)}
                   className="flex-1 py-3 px-4 rounded-xl bg-[#ede8dc] hover:bg-[#d9d0bc] text-[#2d6a5a] font-bold text-sm transition-colors cursor-pointer"
                 >
-                  Cambiar Dificultad
+                  {t("game.changeDifficulty")}
                 </button>
                 <button
                   onClick={() => startGame(difficulty)}
                   className="flex-1 py-3 px-4 rounded-xl bg-[#2d6a5a] hover:bg-[#1e4d40] text-white font-bold text-sm transition-colors cursor-pointer"
                 >
-                  Jugar de Nuevo
+                  {t("game.playAgain")}
                 </button>
               </div>
             </div>
           ) : (
             // Tablero de Cartas
-            <div className={`grid ${config[difficulty].gridClass} gap-4 w-full mb-8`}>
+            <div className={`grid ${config[difficulty].gridClass} gap-2 sm:gap-4 w-full mb-8`}>
               {cards.map((card, index) => {
                 const isFlipped = selected.includes(index) || matched.includes(card.cardId)
                 return (
@@ -281,19 +283,19 @@ export default function Memorama() {
                       </div>
 
                       {/* Cara Trasera (Imagen del Objeto) */}
-                      <div className="absolute inset-0 bg-white rounded-xl border border-[#d9d0bc] flex flex-col items-center justify-between backface-hidden rotate-y-180 overflow-hidden p-2">
+                      <div className="absolute inset-0 bg-white rounded-xl border border-[#d9d0bc] flex flex-col items-center justify-between backface-hidden rotate-y-180 overflow-hidden p-1 sm:p-2">
                         <div className="w-full flex-1 flex items-center justify-center overflow-hidden rounded-lg bg-[#f9f8f6]">
                           <img
                             src={card.image}
-                            alt={card.titulo}
+                            alt={card.titulo || t("mem.defaultTitle")}
                             loading="lazy"
                             className="max-w-full max-h-full object-contain"
                           />
                         </div>
                         {/* Nombre del objeto (solo se muestra cuando se voltea) */}
                         <div className="w-full mt-1.5 text-center">
-                          <p className="text-[10px] font-bold text-[#2d6a5a] truncate w-full px-1">{card.titulo}</p>
-                          <p className="text-[8px] text-[#a09080] font-semibold truncate w-full">{card.cultura}</p>
+                          <p className="text-[8px] sm:text-[10px] font-bold text-[#2d6a5a] truncate w-full px-1">{card.titulo || t("mem.defaultTitle")}</p>
+                          <p className="hidden sm:block text-[8px] text-[#a09080] font-semibold truncate w-full">{card.cultura || t("common.mesoamerica")}</p>
                         </div>
                       </div>
                     </div>

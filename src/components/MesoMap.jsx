@@ -1,8 +1,9 @@
 import { useState, useContext, memo } from "react"
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
 import { AppContext } from "../context/AppContext"
+import { useLanguage } from "../context/useLanguage"
 import CountryModal from "./CountryModal"
-import { Plus, Minus, Crosshair } from "lucide-react"
+import { Plus, Minus, Crosshair, List } from "lucide-react"
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 
@@ -61,10 +62,12 @@ const PAISES_ENTRIES = Object.entries(PAISES)
 
 export default function MesoMap() {
   const { objects } = useContext(AppContext)
+  const { t } = useLanguage()
   const [hoveredCountry, setHoveredCountry] = useState(null)
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
   const [scale, setScale] = useState(380)
+  const [legendOpen, setLegendOpen] = useState(false) // solo se usa en pantallas pequeñas
 
   const objectsByCountry = objects.reduce((acc, obj) => {
     const region = obj.region || "Mesoamérica"
@@ -79,8 +82,7 @@ export default function MesoMap() {
 
   return (
     <div
-      className="w-full md:w-[70%] relative overflow-hidden bg-[#b8d8e8]"
-      style={{ height: "calc(100vh - 180px)", minHeight: "450px" }}
+      className="w-full md:w-[65%] lg:w-[70%] h-[55dvh] min-h-[320px] md:h-[calc(100vh-180px)] md:min-h-[450px] relative overflow-hidden bg-[#b8d8e8]"
       onMouseMove={(e) => setTooltipPos({ x: e.clientX, y: e.clientY })}
     >
       <ComposableMap
@@ -123,37 +125,48 @@ export default function MesoMap() {
       </ComposableMap>
 
       {/* Controles de zoom */}
-      <div className="absolute top-4 left-4 z-20 flex flex-col gap-1">
+      <div className="absolute top-3 left-3 md:top-4 md:left-4 z-20 flex flex-col gap-1">
         <button onClick={() => setScale(s => Math.min(s + 100, 1400))}
-          className="w-8 h-8 bg-white border border-[#d9d0bc] rounded flex items-center justify-center text-[#2c2416] hover:bg-[#f5f0e8] hover:border-[#2d6a5a] transition-all shadow-sm">
+          className="w-9 h-9 md:w-8 md:h-8 bg-white border border-[#d9d0bc] rounded flex items-center justify-center text-[#2c2416] hover:bg-[#f5f0e8] hover:border-[#2d6a5a] transition-all shadow-sm">
           <Plus size={14} />
         </button>
         <button onClick={() => setScale(s => Math.max(s - 100, 400))}
-          className="w-8 h-8 bg-white border border-[#d9d0bc] rounded flex items-center justify-center text-[#2c2416] hover:bg-[#f5f0e8] hover:border-[#2d6a5a] transition-all shadow-sm">
+          className="w-9 h-9 md:w-8 md:h-8 bg-white border border-[#d9d0bc] rounded flex items-center justify-center text-[#2c2416] hover:bg-[#f5f0e8] hover:border-[#2d6a5a] transition-all shadow-sm">
           <Minus size={14} />
         </button>
         <button onClick={() => setScale(380)}
-          className="w-8 h-8 bg-white border border-[#d9d0bc] rounded flex items-center justify-center text-[#2c2416] hover:bg-[#f5f0e8] hover:border-[#2d6a5a] transition-all shadow-sm">
+          className="w-9 h-9 md:w-8 md:h-8 bg-white border border-[#d9d0bc] rounded flex items-center justify-center text-[#2c2416] hover:bg-[#f5f0e8] hover:border-[#2d6a5a] transition-all shadow-sm">
           <Crosshair size={14} />
         </button>
       </div>
 
       {/* Leyenda */}
-      <div className="absolute bottom-4 left-4 z-20 bg-white/90 border border-[#d9d0bc] rounded-xl p-4 shadow-md">
-        <p className="text-[#2c2416] font-bold text-xs mb-3 tracking-wide">Regiones de Mesoamérica</p>
+      <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 z-20 flex flex-col items-start gap-2 max-w-[calc(100%-1.5rem)]">
+        <div className={`${legendOpen ? "block" : "hidden"} md:block bg-white/90 border border-[#d9d0bc] rounded-xl p-3 md:p-4 shadow-md max-h-[40dvh] md:max-h-none overflow-y-auto`}>
+        <p className="text-[#2c2416] font-bold text-xs mb-3 tracking-wide">{t("map.legendTitle")}</p>
         {PAISES_ENTRIES.map(([name, config]) => (
           <div
             key={name}
-            className="flex items-center gap-2 text-[#7a6e5f] text-xs mb-1.5 cursor-pointer hover:text-[#2d6a5a] transition-colors"
+            className="flex items-center gap-2 text-[#7a6e5f] text-xs py-1 cursor-pointer hover:text-[#2d6a5a] transition-colors"
             onClick={() => setSelectedCountry({ name, label: config.label, objects: objectsByCountry[name] || [] })}
           >
             <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: config.color }} />
-            {config.label}
+            {t(`country.${name}`)}
             {objectsByCountry[name]?.length > 0 && (
               <span className="ml-auto pl-2 text-[#2d6a5a] font-semibold">{objectsByCountry[name].length}</span>
             )}
           </div>
         ))}
+        </div>
+
+        {/* Botón para mostrar/ocultar la leyenda en celulares */}
+        <button
+          onClick={() => setLegendOpen(o => !o)}
+          aria-expanded={legendOpen}
+          className="md:hidden flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/95 border border-[#d9d0bc] text-[#2c2416] text-xs font-bold shadow-md cursor-pointer"
+        >
+          <List size={14} /> {t("map.legendTitle")}
+        </button>
       </div>
 
       {/* Tooltip */}
@@ -162,9 +175,9 @@ export default function MesoMap() {
           className="fixed z-50 pointer-events-none px-3 py-2 rounded-xl bg-white border border-[#d9d0bc] text-[#2c2416] text-sm shadow-lg"
           style={{ left: tooltipPos.x + 14, top: tooltipPos.y - 36 }}
         >
-          <span className="font-bold">{PAISES[hoveredCountry]?.label}</span>
+          <span className="font-bold">{t(`country.${hoveredCountry}`)}</span>
           <span className="ml-2 text-[#7a6e5f]">
-            {objectsByCountry[hoveredCountry]?.length || 0} objetos — clic para ver
+            {t("map.tooltip", { n: objectsByCountry[hoveredCountry]?.length || 0 })}
           </span>
         </div>
       )}

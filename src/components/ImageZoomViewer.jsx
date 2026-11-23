@@ -2,9 +2,11 @@ import { useState, useEffect, useRef, useContext } from "react"
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
 import { getImageUrl, getProxiedImageUrl } from "../api/api"
 import { AppContext } from "../context/AppContext"
+import { useLanguage } from "../context/useLanguage"
 
 export default function ImageZoomViewer() {
   const { activeZoomObject, setActiveZoomObject } = useContext(AppContext)
+  const { t } = useLanguage()
   
   if (!activeZoomObject) return null
 
@@ -167,10 +169,10 @@ export default function ImageZoomViewer() {
       style={{ touchAction: "none" }}
     >
       {/* Title Header */}
-      <div className="absolute top-0 inset-x-0 p-6 flex items-center justify-between text-white bg-gradient-to-b from-black/60 to-transparent z-10">
+      <div className="absolute top-0 inset-x-0 p-4 sm:p-6 flex items-center justify-between text-white bg-gradient-to-b from-black/60 to-transparent z-10">
         <div className="max-w-[70%]">
           <span className="text-[10px] tracking-wider uppercase text-[#c9830a] font-bold">
-            Examinando Objeto
+            {t("zoom.examining")}
           </span>
           <h3 className="text-base font-bold truncate mt-0.5">
             {activeZoomObject.titulo}
@@ -200,13 +202,13 @@ export default function ImageZoomViewer() {
         {loading && (
           <div className="absolute flex flex-col items-center justify-center">
             <div className="w-12 h-12 rounded-full border-4 border-white/20 border-t-white animate-spin mb-4" />
-            <p className="text-white/60 text-xs font-semibold">Cargando pieza en alta resolución...</p>
+            <p className="text-white/60 text-xs font-semibold">{t("zoom.loading")}</p>
           </div>
         )}
         
         {error ? (
           <div className="text-center text-white/50 p-6">
-            <p className="text-sm font-semibold">No se pudo cargar la imagen del objeto.</p>
+            <p className="text-sm font-semibold">{t("zoom.error")}</p>
           </div>
         ) : (
           src && (
@@ -230,12 +232,12 @@ export default function ImageZoomViewer() {
 
       {/* Controls HUD */}
       {!loading && !error && (
-        <div className="absolute bottom-10 px-6 py-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-6 text-white shadow-2xl z-10">
+        <div className="absolute bottom-6 sm:bottom-10 px-4 sm:px-6 py-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center gap-3 sm:gap-6 text-white shadow-2xl z-10">
           <button
             onClick={handleZoomOut}
             disabled={zoom <= 1}
             className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
-            title="Alejar"
+            title={t("zoom.out")}
           >
             <ZoomOut size={18} />
           </button>
@@ -248,7 +250,7 @@ export default function ImageZoomViewer() {
             onClick={handleZoomIn}
             disabled={zoom >= 5}
             className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
-            title="Acercar"
+            title={t("zoom.in")}
           >
             <ZoomIn size={18} />
           </button>
@@ -258,7 +260,7 @@ export default function ImageZoomViewer() {
           <button
             onClick={handleReset}
             className="p-2 hover:bg-white/10 rounded-full transition-colors cursor-pointer"
-            title="Restablecer"
+            title={t("zoom.reset")}
           >
             <RotateCcw size={18} />
           </button>

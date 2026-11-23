@@ -1,10 +1,12 @@
 import { useState, useEffect, useContext, useRef } from "react"
 import { AppContext } from "../../context/AppContext"
+import { useLanguage } from "../../context/useLanguage"
 import { getImageUrl } from "../../api/api"
 import { ArrowLeft, Clock, Star, RefreshCw, Award } from "lucide-react"
 
 export default function MuseoMatch() {
   const { allObjects, setActiveGame } = useContext(AppContext)
+  const { t } = useLanguage()
   
   // Estados del juego
   const [mode, setMode] = useState(null) // null, 'timed', 'moves', 'infinite'
@@ -303,45 +305,45 @@ export default function MuseoMatch() {
   return (
     <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-6" style={{ background: "#f5f0e8" }}>
       {/* Botón de retroceso */}
-      <div className="w-full max-w-4xl flex justify-between items-center mb-6">
+      <div className="w-full max-w-4xl flex flex-col sm:flex-row sm:justify-between items-center gap-3 mb-6">
         <button
           onClick={() => setActiveGame(null)}
-          className="flex items-center gap-2 text-[#2d6a5a] hover:text-[#1e4d40] font-semibold text-sm transition-colors cursor-pointer"
+          className="self-start sm:self-auto flex items-center gap-2 text-[#2d6a5a] hover:text-[#1e4d40] font-semibold text-sm transition-colors cursor-pointer"
         >
           <ArrowLeft size={16} />
-          Volver a Juegos
+          {t("game.back")}
         </button>
-        <h2 className="text-2xl font-black text-[#2d6a5a] tracking-wider" style={{ fontFamily: "'Playfair Display', serif" }}>
-          MUSEO MATCH
+        <h2 className="text-xl sm:text-2xl text-center font-black text-[#2d6a5a] tracking-wider" style={{ fontFamily: "'Playfair Display', serif" }}>
+          {t("mm.title")}
         </h2>
-        <div className="w-20"></div>
+        <div className="hidden sm:block w-20"></div>
       </div>
 
       {!mode ? (
         // Pantalla de selección de modo
         <div className="w-full max-w-md bg-white border border-[#d9d0bc] rounded-2xl p-8 shadow-md text-center mt-12">
           <Award size={48} className="text-[#c9830a] mx-auto mb-4 animate-pulse" />
-          <h3 className="text-xl font-bold text-[#2d6a5a] mb-2">Selecciona un Modo de Juego</h3>
-          <p className="text-sm text-[#7a6e5f] mb-6">Alinea 3 o más objetos iguales en el tablero para eliminarlos.</p>
+          <h3 className="text-xl font-bold text-[#2d6a5a] mb-2">{t("mm.selectMode")}</h3>
+          <p className="text-sm text-[#7a6e5f] mb-6">{t("mm.intro")}</p>
 
           <div className="flex flex-col gap-3">
             <button
               onClick={() => startGame("timed")}
               className="py-3.5 px-6 rounded-xl bg-[#eaf0ec] hover:bg-[#d5e4dd] text-[#2d6a5a] font-bold text-sm transition-colors border border-[#2d6a5a]/20 cursor-pointer"
             >
-              Contra Reloj (60 segundos)
+              {t("mm.timed")}
             </button>
             <button
               onClick={() => startGame("moves")}
               className="py-3.5 px-6 rounded-xl bg-[#fff6e6] hover:bg-[#ffeed1] text-[#c9830a] font-bold text-sm transition-colors border border-[#c9830a]/20 cursor-pointer"
             >
-              Límite de Movimientos (25 movimientos)
+              {t("mm.moves")}
             </button>
             <button
               onClick={() => startGame("infinite")}
               className="py-3.5 px-6 rounded-xl bg-[#fdf2ee] hover:bg-[#fadcd0] text-[#b85c38] font-bold text-sm transition-colors border border-[#b85c38]/20 cursor-pointer"
             >
-              Modo Infinito (Entrenamiento)
+              {t("mm.infinite")}
             </button>
           </div>
         </div>
@@ -350,9 +352,9 @@ export default function MuseoMatch() {
           {/* Marcadores */}
           <div className="w-full bg-[#ede8dc] border border-[#d9d0bc] rounded-xl px-4 py-3.5 flex flex-wrap justify-between items-center gap-4 mb-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="text-[#7a6e5f] text-xs font-semibold uppercase tracking-wider">Modo:</span>
+              <span className="text-[#7a6e5f] text-xs font-semibold uppercase tracking-wider">{t("mm.mode")}</span>
               <span className="px-2 py-0.5 rounded text-xs font-bold uppercase bg-white text-[#2d6a5a] border border-[#d9d0bc]">
-                {mode === "timed" ? "Contra Reloj" : mode === "moves" ? "Movimientos" : "Infinito"}
+                {mode === "timed" ? t("mm.modeTimed") : mode === "moves" ? t("mm.modeMoves") : t("mm.modeInfinite")}
               </span>
             </div>
 
@@ -365,12 +367,12 @@ export default function MuseoMatch() {
               )}
               {mode === "moves" && (
                 <div className="text-sm font-semibold text-[#b85c38]">
-                  Movimientos: <span className="font-mono font-bold text-lg">{movesLeft}</span>
+                  {t("game.moves")} <span className="font-mono font-bold text-lg">{movesLeft}</span>
                 </div>
               )}
               <div className="flex items-center gap-1 text-[#c9830a]">
                 <Star size={16} fill="#c9830a" />
-                <span className="font-bold text-lg">{score} pts</span>
+                <span className="font-bold text-lg whitespace-nowrap">{t("game.pts", { n: score })}</span>
               </div>
             </div>
 
@@ -379,7 +381,7 @@ export default function MuseoMatch() {
               className="flex items-center gap-1 px-2.5 py-1.5 rounded bg-[#2d6a5a] text-white hover:bg-[#1e4d40] text-xs font-bold transition-colors cursor-pointer"
             >
               <RefreshCw size={12} />
-              Reiniciar
+              {t("game.restart")}
             </button>
           </div>
 
@@ -388,14 +390,14 @@ export default function MuseoMatch() {
             <div className="w-full max-w-sm bg-white border border-[#d9d0bc] rounded-2xl p-8 shadow-md text-center mt-6">
               <Star size={48} className="text-[#c9830a] mx-auto mb-4" fill="#c9830a" />
               <h3 className="text-2xl font-black text-[#2d6a5a] mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                ¡Partida Terminada!
+                {t("mm.over")}
               </h3>
-              <p className="text-sm text-[#7a6e5f] mb-6">Has completado el desafío del Museo Match.</p>
+              <p className="text-sm text-[#7a6e5f] mb-6">{t("mm.overText")}</p>
 
               <div className="bg-[#f5f0e8] rounded-xl p-4 mb-6 text-left flex flex-col gap-2.5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#7a6e5f] font-bold">Puntuación Final:</span>
-                  <span className="font-bold text-[#c9830a] text-lg">{score} pts</span>
+                  <span className="text-[#7a6e5f] font-bold">{t("game.finalScore")}</span>
+                  <span className="font-bold text-[#c9830a] text-lg">{t("game.pts", { n: score })}</span>
                 </div>
               </div>
 
@@ -404,13 +406,13 @@ export default function MuseoMatch() {
                   onClick={() => setMode(null)}
                   className="flex-1 py-3 px-4 rounded-xl bg-[#ede8dc] hover:bg-[#d9d0bc] text-[#2d6a5a] font-bold text-sm transition-colors cursor-pointer"
                 >
-                  Cambiar Modo
+                  {t("mm.changeMode")}
                 </button>
                 <button
                   onClick={() => startGame(mode)}
                   className="flex-1 py-3 px-4 rounded-xl bg-[#2d6a5a] hover:bg-[#1e4d40] text-white font-bold text-sm transition-colors cursor-pointer"
                 >
-                  Jugar de Nuevo
+                  {t("game.playAgain")}
                 </button>
               </div>
             </div>
@@ -445,7 +447,7 @@ export default function MuseoMatch() {
                     {imageUrl ? (
                       <img
                         src={imageUrl}
-                        alt="Museo Tile"
+                        alt={t("mm.tileAlt")}
                         draggable="false"
                         className="max-w-full max-h-full object-contain pointer-events-none"
                       />

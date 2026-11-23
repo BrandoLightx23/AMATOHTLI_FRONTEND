@@ -1,5 +1,6 @@
 import { useContext } from "react"
 import { AppContext } from "../../context/AppContext"
+import { useLanguage } from "../../context/useLanguage"
 import Memorama from "./Memorama"
 import MatchPiece from "./MatchPiece"
 import MuseoMatch from "./MuseoMatch"
@@ -7,6 +8,7 @@ import { Gamepad2, Award, Zap, Puzzle } from "lucide-react"
 
 export default function GameHub() {
   const { activeGame, setActiveGame } = useContext(AppContext)
+  const { t } = useLanguage()
 
   // Renderizar el juego seleccionado o el menú de selección
   if (activeGame === "memorama") return <Memorama />
@@ -21,16 +23,16 @@ export default function GameHub() {
         <div className="w-16 h-16 bg-[#eaf0ec] text-[#2d6a5a] rounded-full flex items-center justify-center mx-auto mb-4 border border-[#2d6a5a]/20">
           <Gamepad2 size={36} />
         </div>
-        <h2 className="text-3xl font-black text-[#2d6a5a] tracking-wider mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-          EXPLORA Y JUEGA
+        <h2 className="text-2xl sm:text-3xl font-black text-[#2d6a5a] tracking-wider mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+          {t("hub.title")}
         </h2>
         <p className="text-sm text-[#7a6e5f]">
-          Aprende y pon a prueba tus conocimientos sobre el patrimonio cultural mesoamericano jugando con las obras de la colección Reinhart del Museo Rietberg.
+          {t("hub.subtitle")}
         </p>
       </div>
 
       {/* Grid de Juegos */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full max-w-5xl">
         
         {/* Tarjeta Juego 1: Memorama */}
         <div className="bg-white border border-[#d9d0bc] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
@@ -38,16 +40,16 @@ export default function GameHub() {
             <div className="w-12 h-12 bg-[#fff6e6] text-[#c9830a] rounded-xl flex items-center justify-center mb-4 border border-[#c9830a]/20">
               <Award size={24} />
             </div>
-            <h3 className="text-lg font-bold text-[#2c2416] mb-2">Memorama Prehispánico</h3>
+            <h3 className="text-lg font-bold text-[#2c2416] mb-2">{t("hub.memorama.title")}</h3>
             <p className="text-xs text-[#7a6e5f] leading-relaxed mb-6">
-              Ejercita tu memoria visual encontrando los pares de vasijas, textiles, estelas y esculturas mesoamericanas de la colección.
+              {t("hub.memorama.desc")}
             </p>
           </div>
           <button
             onClick={() => setActiveGame("memorama")}
             className="w-full py-3 px-4 bg-[#c9830a] hover:bg-[#b87208] text-white rounded-xl text-xs font-bold transition-colors shadow-sm cursor-pointer"
           >
-            Jugar Memorama
+            {t("hub.memorama.btn")}
           </button>
         </div>
 
@@ -57,16 +59,16 @@ export default function GameHub() {
             <div className="w-12 h-12 bg-[#eaf0ec] text-[#2d6a5a] rounded-xl flex items-center justify-center mb-4 border border-[#2d6a5a]/20">
               <Puzzle size={24} />
             </div>
-            <h3 className="text-lg font-bold text-[#2c2416] mb-2">Une la Pieza con su Nombre</h3>
+            <h3 className="text-lg font-bold text-[#2c2416] mb-2">{t("hub.match.title")}</h3>
             <p className="text-xs text-[#7a6e5f] leading-relaxed mb-6">
-              ¿Puedes reconocer cada obra? Conecta de forma interactiva las imágenes de las piezas con sus nombres oficiales de catálogo.
+              {t("hub.match.desc")}
             </p>
           </div>
           <button
             onClick={() => setActiveGame("match_piece")}
             className="w-full py-3 px-4 bg-[#2d6a5a] hover:bg-[#1e4d40] text-white rounded-xl text-xs font-bold transition-colors shadow-sm cursor-pointer"
           >
-            Jugar Conexión
+            {t("hub.match.btn")}
           </button>
         </div>
 
@@ -76,16 +78,16 @@ export default function GameHub() {
             <div className="w-12 h-12 bg-[#fdf2ee] text-[#b85c38] rounded-xl flex items-center justify-center mb-4 border border-[#b85c38]/20">
               <Zap size={24} />
             </div>
-            <h3 className="text-lg font-bold text-[#2c2416] mb-2">Museo Match</h3>
+            <h3 className="text-lg font-bold text-[#2c2416] mb-2">{t("hub.museo.title")}</h3>
             <p className="text-xs text-[#7a6e5f] leading-relaxed mb-6">
-              Alinea tres o más figuras iguales en el tablero. Crea cascadas de combinaciones para acumular la máxima puntuación.
+              {t("hub.museo.desc")}
             </p>
           </div>
           <button
             onClick={() => setActiveGame("museo_match")}
             className="w-full py-3 px-4 bg-[#b85c38] hover:bg-[#9c4c2d] text-white rounded-xl text-xs font-bold transition-colors shadow-sm cursor-pointer"
           >
-            Jugar Museo Match
+            {t("hub.museo.btn")}
           </button>
         </div>
 
