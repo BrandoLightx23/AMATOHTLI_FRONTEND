@@ -6,8 +6,8 @@ function getInitialLang() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (SUPPORTED_LANGS.includes(saved)) return saved
-  } catch {
-  
+  } catch (error) {
+    console.warn("Unable to read saved language preference.", error)
   }
   return DEFAULT_LANG
 }
@@ -41,8 +41,8 @@ export function LanguageProvider({ children }) {
     setLangState(next)
     try {
       localStorage.setItem(STORAGE_KEY, next)
-    } catch {
-      
+    } catch (error) {
+      console.warn("Unable to save language preference.", error)
     }
   }, [])
 
