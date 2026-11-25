@@ -10,10 +10,12 @@ import GameHub from "../components/games/GameHub"
 import ImageZoomViewer from "../components/ImageZoomViewer"
 import { useContext } from "react"
 import { AppContext } from "../context/AppContext"
+import { useLanguage } from "../context/useLanguage"
 import { Leaf, Heart } from "lucide-react"
 
 export default function Home() {
   const { loading, objects, activeTab } = useContext(AppContext)
+  const { t } = useLanguage()
 
   const renderContent = () => {
     switch (activeTab) {
@@ -51,12 +53,12 @@ export default function Home() {
             <div className="px-4 sm:px-6 py-2 border-b border-[#d9d0bc] bg-[#f5f0e8]">
               {loading ? (
                 <span className="text-[#2d6a5a] text-xs animate-pulse">
-                  Cargando objetos...
+                  {t("home.loading")}
                 </span>
               ) : (
                 <span className="text-[#a09080] text-xs">
-                  {objects.length} objeto{objects.length !== 1 ? "s" : ""} en este período
-                  <span className="hidden sm:inline"> — haz clic en un país del mapa</span>
+                  {t(objects.length === 1 ? "home.countOne" : "home.countMany", { n: objects.length })}
+                  <span className="hidden sm:inline">{t("home.clickCountry")}</span>
                 </span>
               )}
             </div>
@@ -72,7 +74,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col animate-fade-in" style={{ background: "#f5f0e8" }}>
+    <div className="min-h-dvh flex flex-col animate-fade-in" style={{ background: "#f5f0e8" }}>
       <Header />
 
       {renderContent()}
@@ -81,11 +83,11 @@ export default function Home() {
       <footer className="px-4 sm:px-8 py-3 bg-[#ede8dc] border-t border-[#d9d0bc] flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <span className="flex items-center gap-2 text-[#7a6e5f] text-xs">
           <Leaf size={13} className="text-[#2d6a5a] shrink-0" />
-          Viaja por el tiempo y descubre la riqueza cultural del arte precolombino.
+          {t("footer.left")}
         </span>
         <span className="flex items-center gap-2 text-[#7a6e5f] text-xs">
           <Heart size={13} className="text-[#b85c38] shrink-0" fill="#b85c38" />
-          Hecho con pasión por la historia
+          {t("footer.right")}
         </span>
       </footer>
 

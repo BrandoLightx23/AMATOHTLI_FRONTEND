@@ -11,14 +11,20 @@ import {
 }
   from './context/AppContext'
 
+import { LanguageProvider } from './context/LanguageContext'
+
 ReactDOM.createRoot(
   document.getElementById('root')
 ).render(
 
-  <AppProvider>
+  <LanguageProvider>
 
-    <App />
+    <AppProvider>
 
-  </AppProvider>
+      <App />
+
+    </AppProvider>
+
+  </LanguageProvider>
 
 )

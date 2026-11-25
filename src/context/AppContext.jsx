@@ -1,12 +1,15 @@
-import { createContext, useState, useEffect } from "react"
+import { createContext, useState, useEffect, useMemo } from "react"
 import { getObjects } from "../api/api"
+import { UNKNOWN_YEAR } from "../constants"
+import { useLanguage } from "./useLanguage"
 
 export const AppContext = createContext()
 
 export function AppProvider({ children }) {
-  const [allObjects, setAllObjects] = useState([])
+  const { t, place, countryName } = useLanguage()
+  const [rawObjects, setRawObjects] = useState([])
   const [selectedYear, setSelectedYear] = useState(400)
-  const [selectedObject, setSelectedObject] = useState(null)
+  const [selectedObjectRaw, setSelectedObject] = useState(null)
   const [search, setSearch] = useState("")
   const [objects, setObjects] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,6 +17,31 @@ export function AppProvider({ children }) {
   const [activeTab, setActiveTab] = useState("mapa") // Tab predeterminado: "mapa"
   const [activeGame, setActiveGame] = useState(null) // null, "memorama", "match_piece", "museo_match"
   const [activeZoomObject, setActiveZoomObject] = useState(null) // Para el visor de zoom "Examinar Objeto"
+
+  // El backend rellena algunos campos vacíos con textos en español
+  // ("Desconocida", "Sin título"...) y devuelve el país con su nombre en inglés.
+  // Aquí los adaptamos al idioma elegido, así todos los componentes los muestran bien.
+  const allObjects = useMemo(() => rawObjects.map(obj => {
+    const lugar = place(obj.lugar_origen)
+    const pais = countryName(obj.pais)
+    const lugarEnPais = lugar && pais && lugar.toLowerCase().includes(pais.toLowerCase())
+    return {
+      ...obj,
+      titulo: obj.titulo === "Sin título" ? t("common.untitled") : obj.titulo,
+      estilo_cultura: obj.estilo_cultura === "Desconocida" ? t("common.unknown") : obj.estilo_cultura,
+      autor: obj.autor === "Desconocido" ? "" : obj.autor,
+      lugar_origen: lugar,
+      pais,
+      // Texto de procedencia para mostrar (sin repetir el país si ya viene incluido)
+      regionLabel: lugar ? (lugarEnPais ? lugar : `${lugar}, ${pais}`) : pais,
+    }
+  }), [rawObjects, t, place, countryName])
+
+  // El objeto seleccionado se resuelve contra la lista actual para respetar el idioma
+  const selectedObject = useMemo(() => {
+    if (!selectedObjectRaw) return null
+    return allObjects.find(o => o.id === selectedObjectRaw.id) || selectedObjectRaw
+  }, [selectedObjectRaw, allObjects])
 
   // Cargar todos los objetos de la colección al inicio
   useEffect(() => {
@@ -25,7 +53,7 @@ export function AppProvider({ children }) {
         console.log("Objetos recibidos:", data)
         console.log("Cantidad:", data.length)
 
-        setAllObjects(data)
+        setRawObjects(data)
         setObjects(data.slice(0, 10)) // temporal
 
         // Calcular dinámicamente los siglos (inicios de siglo) con al menos un objeto
@@ -43,7 +71,7 @@ export function AppProvider({ children }) {
 
         const sortedCenturies = Array.from(centuries).sort((a, b) => a - b)
         if (hasUnknown) {
-          sortedCenturies.push("Fecha desconocida")
+          sortedCenturies.push(UNKNOWN_YEAR)
         }
 
         setAvailableYears(sortedCenturies)
@@ -75,7 +103,7 @@ export function AppProvider({ children }) {
       setObjects(filtered)
     } else {
       let filtered = []
-      if (selectedYear === "Fecha desconocida") {
+      if (selectedYear === UNKNOWN_YEAR) {
         filtered = allObjects.filter(obj => obj.year === null)
       } else {
         filtered = allObjects.filter(obj =>

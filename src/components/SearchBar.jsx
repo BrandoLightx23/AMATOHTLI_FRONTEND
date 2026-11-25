@@ -1,9 +1,11 @@
 import { useContext } from "react"
 import { Search } from "lucide-react"
 import { AppContext } from "../context/AppContext"
+import { useLanguage } from "../context/useLanguage"
 
 export default function SearchBar() {
   const { search, setSearch } = useContext(AppContext)
+  const { t } = useLanguage()
 
   return (
     <div className="px-6 py-3 bg-[#f5f0e8] border-b border-[#d9d0bc]">
@@ -12,7 +14,7 @@ export default function SearchBar() {
           <Search size={16} className="text-[#a09080] flex-shrink-0" />
           <input
             type="text"
-            placeholder="Buscar cultura, región u objeto..."
+            placeholder={t("search.placeholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent outline-none w-full text-[#2c2416] placeholder-[#a09080] text-sm py-3"
