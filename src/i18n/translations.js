@@ -320,7 +320,7 @@ const en = {
 
   "inicio.badge": "Reinhart Collection",
   "inicio.heroTitle": "AMATOHTLI: Pre-Columbian Art Through Time",
-  "inicio.heroText": "Welcome to the interactive explorer of the Anne-Marie y Caspar Reinhart Collection at Museum Rietberg in Zurich. Discover 681 historical pieces of pre-Hispanic ceramics, textiles and goldwork through interactive maps, timelines and educational games.",
+  "inicio.heroText": "Welcome to the interactive explorer of the Anne-Marie and Caspar Reinhart Collection at Museum Rietberg in Zurich. Discover 681 historical pieces of pre-Hispanic ceramics, textiles and goldwork through interactive maps, timelines and educational games.",
   "inicio.exploreMap": "Explore the Map",
   "inicio.goGames": "Go to the Games",
   "inicio.card.map.title": "Interactive Map",
