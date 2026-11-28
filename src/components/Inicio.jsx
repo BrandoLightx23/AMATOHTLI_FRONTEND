@@ -1,18 +1,21 @@
-import { useContext } from "react"
+import { useContext, useMemo } from "react"
 import { AppContext } from "../context/AppContext"
 import { useLanguage } from "../context/useLanguage"
 import { Map, Calendar, Library, Gamepad2, ArrowRight } from "lucide-react"
 
 export default function Inicio() {
-  const { allObjects, setActiveTab, setActiveGame } = useContext(AppContext)
+  const { allObjects, collections, selectedCollectionSlug, setActiveTab } = useContext(AppContext)
   const { t } = useLanguage()
 
-  // Calcular estadísticas de la colección
-  const total = allObjects.length
+  const activeCollection = collections.find(collection => collection.slug === selectedCollectionSlug)
+  const statsObjects = useMemo(() => activeCollection
+    ? allObjects.filter(obj => String(obj.coleccion_id) === String(activeCollection.id))
+    : allObjects, [allObjects, activeCollection])
+  const total = statsObjects.length
 
   // Agrupar por países
   const countryCounts = {}
-  allObjects.forEach(obj => {
+  statsObjects.forEach(obj => {
     // Usamos el país que el backend o frontend asocia a la región
     const region = (obj.lugar_origen || "").toLowerCase()
     let country = "other"

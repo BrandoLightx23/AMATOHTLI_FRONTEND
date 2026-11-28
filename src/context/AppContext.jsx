@@ -1,5 +1,5 @@
-import { createContext, useState, useEffect, useMemo } from "react"
-import { getObjects } from "../api/api"
+import { createContext, useState, useEffect, useMemo, useCallback } from "react"
+import { getObjects, getCollections } from "../api/api"
 import { UNKNOWN_YEAR } from "../constants"
 import { useLanguage } from "./useLanguage"
 
@@ -8,6 +8,10 @@ export const AppContext = createContext()
 export function AppProvider({ children }) {
   const { t, place, countryName } = useLanguage()
   const [rawObjects, setRawObjects] = useState([])
+  const [collections, setCollections] = useState([])
+  const [selectedCollectionSlug, setSelectedCollectionSlugState] = useState(() =>
+    typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("coleccion") || ""
+  )
   const [selectedYear, setSelectedYear] = useState(400)
   const [selectedObjectRaw, setSelectedObject] = useState(null)
   const [search, setSearch] = useState("")
@@ -17,6 +21,25 @@ export function AppProvider({ children }) {
   const [activeTab, setActiveTab] = useState("mapa") // Tab predeterminado: "mapa"
   const [activeGame, setActiveGame] = useState(null) // null, "memorama", "match_piece", "museo_match"
   const [activeZoomObject, setActiveZoomObject] = useState(null) // Para el visor de zoom "Examinar Objeto"
+
+  const setSelectedCollectionSlug = useCallback((slug) => {
+    const nextSlug = slug || ""
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href)
+      if (nextSlug) url.searchParams.set("coleccion", nextSlug)
+      else url.searchParams.delete("coleccion")
+      window.history.pushState({}, "", `${url.pathname}${url.search}${url.hash}`)
+    }
+    setSelectedCollectionSlugState(nextSlug)
+  }, [])
+
+  useEffect(() => {
+    const syncCollectionFromUrl = () => {
+      setSelectedCollectionSlugState(new URLSearchParams(window.location.search).get("coleccion") || "")
+    }
+    window.addEventListener("popstate", syncCollectionFromUrl)
+    return () => window.removeEventListener("popstate", syncCollectionFromUrl)
+  }, [])
 
   // El backend rellena algunos campos vacíos con textos en español
   // ("Desconocida", "Sin título"...) y devuelve el país con su nombre en inglés.
@@ -48,12 +71,19 @@ export function AppProvider({ children }) {
     const loadAll = async () => {
       setLoading(true)
       try {
-        const data = await getObjects()
+        const [data, collectionsData] = await Promise.all([
+          getObjects(),
+          getCollections().catch(err => {
+            console.error("Error al cargar las colecciones:", err)
+            return []
+          }),
+        ])
 
         console.log("Objetos recibidos:", data)
         console.log("Cantidad:", data.length)
 
         setRawObjects(data)
+        setCollections(collectionsData)
         setObjects(data.slice(0, 10)) // temporal
 
         // Calcular dinámicamente los siglos (inicios de siglo) con al menos un objeto
@@ -122,6 +152,9 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       allObjects,
+      collections,
+      selectedCollectionSlug,
+      setSelectedCollectionSlug,
       selectedYear, setSelectedYear,
       selectedObject, setSelectedObject,
       search, setSearch,
