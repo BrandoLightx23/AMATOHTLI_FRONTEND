@@ -3,12 +3,28 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 const API = `${BACKEND_URL}/api`
 const IMAGES_BASE = BACKEND_URL
 
-export const getObjects = async (collectionId) => {
-  const query = collectionId == null ? "" : `?coleccion_id=${encodeURIComponent(collectionId)}`
-  const response = await fetch(`${API}/objects${query}`)
+export const getObjects = async (collectionId, filters = {}) => {
+  const params = new URLSearchParams()
+  if (collectionId != null) params.set("coleccion_id", collectionId)
+  if (filters.cultura) params.set("cultura", filters.cultura)
+  if (filters.material) params.set("material", filters.material)
+  if (filters.region) params.set("region", filters.region)
+  if (filters.year_min != null && filters.year_min !== "") params.set("year_min", filters.year_min)
+  if (filters.year_max != null && filters.year_max !== "") params.set("year_max", filters.year_max)
+  if (filters.sin_fecha) params.set("sin_fecha", "true")
+  if (filters.q) params.set("q", filters.q)
+  const qs = params.toString()
+  const response = await fetch(`${API}/objects${qs ? `?${qs}` : ""}`)
   if (!response.ok) throw new Error(`Unable to load objects (${response.status})`)
   const data = await response.json()
   return data.archivos || []
+}
+
+export const getFilters = async (collectionId) => {
+  const query = collectionId == null ? "" : `?coleccion_id=${encodeURIComponent(collectionId)}`
+  const response = await fetch(`${API}/filters${query}`)
+  if (!response.ok) throw new Error(`Unable to load filters (${response.status})`)
+  return response.json()
 }
 
 export const getCollections = async () => {

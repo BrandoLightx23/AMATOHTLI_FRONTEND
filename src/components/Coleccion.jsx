@@ -1,9 +1,10 @@
-import { useState, useContext, useMemo } from "react"
+import { useState, useContext, useMemo, useEffect } from "react"
 import { AppContext } from "../context/AppContext"
 import { useLanguage } from "../context/useLanguage"
+import { getFilters } from "../api/api"
 import MuseumImage from "./MuseumImage"
 import ColeccionSelector from "./ColeccionSelector"
-import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, X } from "lucide-react"
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, X, ExternalLink, Image as ImageIcon } from "lucide-react"
 
 // Valores internos (independientes del idioma) para la opción "todos" de los filtros
 const ALL = "__all__"
@@ -21,35 +22,68 @@ export default function Coleccion() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCulture, setSelectedCulture] = useState(ALL)
   const [selectedMaterial, setSelectedMaterial] = useState(ALL)
+  const [selectedRegion, setSelectedRegion] = useState(ALL)
+  const [yearMin, setYearMin] = useState("")
+  const [yearMax, setYearMax] = useState("")
+  const [sinFecha, setSinFecha] = useState(false)
+  const [filterOptions, setFilterOptions] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [detailedObject, setDetailedObject] = useState(null) // Objeto para el modal de detalle
 
   const itemsPerPage = 20
 
+  const activeCollection = collections.find(collection => collection.slug === selectedCollectionSlug)
+
+  // Opciones reales de filtro desde el backend (con conteos)
+  useEffect(() => {
+    let cancelled = false
+    getFilters(activeCollection ? activeCollection.id : null)
+      .then(data => { if (!cancelled) setFilterOptions(data) })
+      .catch(err => console.error("Error al cargar los filtros:", err))
+    return () => { cancelled = true }
+  }, [activeCollection])
+
   // Obtener opciones de filtro dinámicamente
   const cultures = useMemo(() => {
+    if (filterOptions?.culturas?.length) {
+      return [ALL, ...filterOptions.culturas.map(c => c.valor)]
+    }
     const list = new Set()
     allObjects.forEach(obj => {
       if (obj.estilo_cultura) list.add(obj.estilo_cultura)
     })
     return [ALL, ...Array.from(list).sort()]
-  }, [allObjects])
+  }, [allObjects, filterOptions])
 
   const materials = useMemo(() => {
+    if (filterOptions?.materiales?.length) {
+      return [ALL, ...filterOptions.materiales.map(m => m.valor)]
+    }
     const list = new Set()
     allObjects.forEach(obj => {
-      // Extraemos la primera palabra o material clave
       if (obj.material_tecnica) {
         const mat = obj.material_tecnica.split(",")[0].split(" ")[0]
         if (mat.length > 2) list.add(mat.charAt(0).toUpperCase() + mat.slice(1).toLowerCase())
       }
     })
-    return [ALL, ...Array.from(list).sort().slice(0, 15)] // Limitar a los 15 más comunes
-  }, [allObjects])
+    return [ALL, ...Array.from(list).sort().slice(0, 15)]
+  }, [allObjects, filterOptions])
+
+  const regions = useMemo(() => {
+    if (filterOptions?.regiones?.length) {
+      return [ALL, ...filterOptions.regiones.map(r => r.valor)]
+    }
+    const list = new Set()
+    allObjects.forEach(obj => {
+      if (obj.lugar_origen) list.add(obj.lugar_origen)
+    })
+    return [ALL, ...Array.from(list).sort()]
+  }, [allObjects, filterOptions])
 
   // Si cambia el idioma, algunas opciones cambian de texto: volver a "todas" si la elegida ya no existe
   const activeCulture = cultures.includes(selectedCulture) ? selectedCulture : ALL
-  const activeCollection = collections.find(collection => collection.slug === selectedCollectionSlug)
+  const activeMaterial = materials.includes(selectedMaterial) ? selectedMaterial : ALL
+  const activeRegion = regions.includes(selectedRegion) ? selectedRegion : ALL
   const collectionNames = useMemo(
     () => new Map(collections.map(collection => [String(collection.id), collection.nombre])),
     [collections]
@@ -63,6 +97,8 @@ export default function Coleccion() {
     : allObjects, [allObjects, activeCollection])
 
   const filteredObjects = useMemo(() => {
+    const yMin = yearMin === "" ? null : Number(yearMin)
+    const yMax = yearMax === "" ? null : Number(yearMax)
     return collectionObjects.filter(obj => {
       const matchSearch = searchTerm === "" || 
         (obj.titulo || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -71,18 +107,45 @@ export default function Coleccion() {
 
       const matchCulture = activeCulture === ALL || obj.estilo_cultura === activeCulture
       
-      const matchMaterial = selectedMaterial === ALL || 
-        (obj.material_tecnica || "").toLowerCase().includes(selectedMaterial.toLowerCase())
+      const matchMaterial = activeMaterial === ALL || 
+        (obj.material_tecnica || "").toLowerCase().includes(activeMaterial.toLowerCase())
 
-      return matchSearch && matchCulture && matchMaterial
+      const matchRegion = activeRegion === ALL ||
+        (obj.lugar_origen || "").toLowerCase().includes(activeRegion.toLowerCase())
+
+      let matchYear = true
+      if (sinFecha) {
+        matchYear = obj.year === null || obj.year === undefined
+      } else if (yMin !== null || yMax !== null) {
+        if (obj.year === null || obj.year === undefined) matchYear = false
+        else if (yMin !== null && obj.year < yMin) matchYear = false
+        else if (yMax !== null && obj.year > yMax) matchYear = false
+      }
+
+      return matchSearch && matchCulture && matchMaterial && matchRegion && matchYear
     })
-  }, [collectionObjects, searchTerm, activeCulture, selectedMaterial])
+  }, [collectionObjects, searchTerm, activeCulture, activeMaterial, activeRegion, yearMin, yearMax, sinFecha])
 
   // Reiniciar a la página 1 cuando cambian los filtros
   const handleFilterChange = (type, value) => {
     if (type === "culture") setSelectedCulture(value)
     if (type === "material") setSelectedMaterial(value)
+    if (type === "region") setSelectedRegion(value)
     if (type === "search") setSearchTerm(value)
+    if (type === "yearMin") setYearMin(value)
+    if (type === "yearMax") setYearMax(value)
+    if (type === "sinFecha") setSinFecha(value)
+    setCurrentPage(1)
+  }
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    setSelectedCulture(ALL)
+    setSelectedMaterial(ALL)
+    setSelectedRegion(ALL)
+    setYearMin("")
+    setYearMax("")
+    setSinFecha(false)
     setCurrentPage(1)
   }
 
@@ -116,8 +179,7 @@ export default function Coleccion() {
             t={t}
             onChange={(slug) => {
               setSelectedCollectionSlug(slug)
-              setSearchTerm("")
-              setCurrentPage(1)
+              clearFilters()
             }}
           />
         </div>
@@ -153,7 +215,7 @@ export default function Coleccion() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <span className="text-[11px] font-bold text-[#7a6e5f] uppercase tracking-wider">{t("col.material")}</span>
           <select
-            value={selectedMaterial}
+            value={activeMaterial}
             onChange={(e) => handleFilterChange("material", e.target.value)}
             className="flex-1 min-w-0 sm:flex-none sm:max-w-[14rem] bg-white border border-[#d9d0bc] rounded-xl px-3 py-2 text-xs text-[#2c2416] outline-none"
           >
@@ -162,6 +224,56 @@ export default function Coleccion() {
             ))}
           </select>
         </div>
+
+        {/* Filtro Región */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-[11px] font-bold text-[#7a6e5f] uppercase tracking-wider">{t("col.region")}</span>
+          <select
+            value={activeRegion}
+            onChange={(e) => handleFilterChange("region", e.target.value)}
+            className="flex-1 min-w-0 sm:flex-none sm:max-w-[14rem] bg-white border border-[#d9d0bc] rounded-xl px-3 py-2 text-xs text-[#2c2416] outline-none"
+          >
+            {regions.map(r => (
+              <option key={r} value={r}>{r === ALL ? t("col.allRegions") : r}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Filtro rango de años */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-[11px] font-bold text-[#7a6e5f] uppercase tracking-wider">{t("col.yearFrom")}</span>
+          <input
+            type="number"
+            value={yearMin}
+            placeholder={filterOptions?.fechaMin ?? ""}
+            onChange={(e) => handleFilterChange("yearMin", e.target.value)}
+            className="w-24 bg-white border border-[#d9d0bc] rounded-xl px-3 py-2 text-xs text-[#2c2416] outline-none"
+          />
+          <span className="text-[11px] font-bold text-[#7a6e5f] uppercase tracking-wider">{t("col.yearTo")}</span>
+          <input
+            type="number"
+            value={yearMax}
+            placeholder={filterOptions?.fechaMax ?? ""}
+            onChange={(e) => handleFilterChange("yearMax", e.target.value)}
+            className="w-24 bg-white border border-[#d9d0bc] rounded-xl px-3 py-2 text-xs text-[#2c2416] outline-none"
+          />
+          <label className="flex items-center gap-1.5 text-xs text-[#2c2416] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={sinFecha}
+              onChange={(e) => handleFilterChange("sinFecha", e.target.checked)}
+              className="accent-[#2d6a5a]"
+            />
+            {t("col.withoutDate")}
+          </label>
+        </div>
+
+        <button
+          onClick={clearFilters}
+          className="px-4 py-2 rounded-xl bg-white border border-[#d9d0bc] text-xs font-bold text-[#2d6a5a] hover:bg-[#f9f8f6] cursor-pointer"
+        >
+          {t("col.clearFilters")}
+        </button>
 
       </div>
 
@@ -283,16 +395,27 @@ export default function Coleccion() {
                   </span>
                 </div>
 
+                {detailedObject.descripcionCompleta && (
+                  <div className="mb-4">
+                    <span className="text-[#a09080] font-semibold text-xs">{t("detail.description")}</span>
+                    <p className="text-[#2c2416] text-xs leading-relaxed mt-1">{detailedObject.descripcionCompleta}</p>
+                  </div>
+                )}
+
                 <div className="flex flex-col gap-2.5 text-xs border-t border-[#d9d0bc]/50 pt-4">
-                  <div>
-                    <span className="text-[#a09080] font-semibold">{t("detail.region")}</span>
-                    <p className="text-[#2c2416] font-medium">{detailedObject.lugar_origen || t("common.unknown")}</p>
-                  </div>
-                  <div>
-                    <span className="text-[#a09080] font-semibold">{t("detail.material")}</span>
-                    <p className="text-[#2c2416] font-medium">{detailedObject.material_tecnica || t("common.unknown")}</p>
-                  </div>
-                  {detailedObject.dimensiones && (
+                  {detailedObject.lugar_origen && (
+                    <div>
+                      <span className="text-[#a09080] font-semibold">{t("detail.region")}</span>
+                      <p className="text-[#2c2416] font-medium">{detailedObject.lugar_origen}</p>
+                    </div>
+                  )}
+                  {detailedObject.material_tecnica && detailedObject.material_tecnica !== "N/A" && (
+                    <div>
+                      <span className="text-[#a09080] font-semibold">{t("detail.material")}</span>
+                      <p className="text-[#2c2416] font-medium">{detailedObject.material_tecnica}</p>
+                    </div>
+                  )}
+                  {detailedObject.dimensiones && detailedObject.dimensiones !== "N/A" && (
                     <div>
                       <span className="text-[#a09080] font-semibold">{t("detail.dimensions")}</span>
                       <p className="text-[#2c2416] font-medium">{detailedObject.dimensiones}</p>
@@ -303,6 +426,43 @@ export default function Coleccion() {
                       <span className="text-[#a09080] font-semibold">{t("detail.credits")}</span>
                       <p className="text-[#7a6e5f] text-[11px] leading-relaxed italic">{detailedObject.creditos}</p>
                     </div>
+                  )}
+                </div>
+
+                {/* Acciones: museo / Commons / alta resolución */}
+                <div className="flex flex-col gap-2 mt-5">
+                  {detailedObject.urlMuseo && (
+                    <a
+                      href={detailedObject.urlMuseo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2d6a5a] hover:bg-[#1e4d40] text-white text-xs font-bold transition-colors"
+                    >
+                      <ExternalLink size={14} />
+                      {t("detail.viewMuseum")}
+                    </a>
+                  )}
+                  {detailedObject.commonsPageUrl && (
+                    <a
+                      href={detailedObject.commonsPageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#d9d0bc] text-[#2c2416] text-xs font-bold hover:bg-[#f9f8f6] transition-colors"
+                    >
+                      <ExternalLink size={14} />
+                      {t("detail.viewCommons")}
+                    </a>
+                  )}
+                  {(detailedObject.imagenAltaRes || detailedObject.url) && (
+                    <a
+                      href={detailedObject.imagenAltaRes || detailedObject.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-[#d9d0bc] text-[#2c2416] text-xs font-bold hover:bg-[#f9f8f6] transition-colors"
+                    >
+                      <ImageIcon size={14} />
+                      {t("detail.viewHighRes")}
+                    </a>
                   )}
                 </div>
 
