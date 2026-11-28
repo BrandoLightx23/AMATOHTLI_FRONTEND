@@ -3,16 +3,16 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 const API = `${BACKEND_URL}/api`
 const IMAGES_BASE = BACKEND_URL
 
-export const getObjects = async (collectionId) => {
-  const query = collectionId == null ? "" : `?coleccion_id=${encodeURIComponent(collectionId)}`
+export const getObjects = async (language = "es") => {
+  const query = `?idioma=${encodeURIComponent(language)}`
   const response = await fetch(`${API}/objects${query}`)
   if (!response.ok) throw new Error(`Unable to load objects (${response.status})`)
   const data = await response.json()
   return data.archivos || []
 }
 
-export const getCollections = async () => {
-  const response = await fetch(`${API}/colecciones`)
+export const getCollections = async (language = "es") => {
+  const response = await fetch(`${API}/colecciones?idioma=${encodeURIComponent(language)}`)
   if (!response.ok) throw new Error(`Unable to load collections (${response.status})`)
   const data = await response.json()
   return Array.isArray(data) ? data : data.colecciones || []
