@@ -6,7 +6,7 @@ import { useLanguage } from "./useLanguage"
 export const AppContext = createContext()
 
 export function AppProvider({ children }) {
-  const { t, place, countryName } = useLanguage()
+  const { t, place, countryName, lang } = useLanguage()
   const [rawObjects, setRawObjects] = useState([])
   const [collections, setCollections] = useState([])
   const [selectedCollectionSlug, setSelectedCollectionSlugState] = useState(() =>
@@ -68,17 +68,19 @@ export function AppProvider({ children }) {
 
   // Cargar todos los objetos de la colección al inicio
   useEffect(() => {
+    let active = true
     const loadAll = async () => {
       setLoading(true)
       try {
         const [data, collectionsData] = await Promise.all([
-          getObjects(),
-          getCollections().catch(err => {
+          getObjects(lang),
+          getCollections(lang).catch(err => {
             console.error("Error al cargar las colecciones:", err)
             return []
           }),
         ])
 
+        if (!active) return
         console.log("Objetos recibidos:", data)
         console.log("Cantidad:", data.length)
 
@@ -111,13 +113,16 @@ export function AppProvider({ children }) {
           setSelectedYear(sortedCenturies[0])
         }
       } catch (err) {
-        console.error("Error al inicializar la colección completa:", err)
+        if (active) console.error("Error al inicializar la colección completa:", err)
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
     loadAll()
-  }, [])
+    return () => {
+      active = false
+    }
+  }, [lang])
 
   // Filtrado reactivo en local para evitar latencias de red
   useEffect(() => {

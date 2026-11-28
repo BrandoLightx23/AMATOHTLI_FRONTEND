@@ -3,7 +3,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 const API = `${BACKEND_URL}/api`
 const IMAGES_BASE = BACKEND_URL
 
-export const getObjects = async (collectionId, filters = {}) => {
+export const getObjects = async (collectionId = null, filters = {}, language = "es") => {
   const params = new URLSearchParams()
   if (collectionId != null) params.set("coleccion_id", collectionId)
   if (filters.cultura) params.set("cultura", filters.cultura)
@@ -13,8 +13,9 @@ export const getObjects = async (collectionId, filters = {}) => {
   if (filters.year_max != null && filters.year_max !== "") params.set("year_max", filters.year_max)
   if (filters.sin_fecha) params.set("sin_fecha", "true")
   if (filters.q) params.set("q", filters.q)
+  params.set("idioma", language)
   const qs = params.toString()
-  const response = await fetch(`${API}/objects${qs ? `?${qs}` : ""}`)
+  const response = await fetch(`${API}/objects?${qs}`)
   if (!response.ok) throw new Error(`Unable to load objects (${response.status})`)
   const data = await response.json()
   return data.archivos || []
@@ -27,8 +28,8 @@ export const getFilters = async (collectionId) => {
   return response.json()
 }
 
-export const getCollections = async () => {
-  const response = await fetch(`${API}/colecciones`)
+export const getCollections = async (language = "es") => {
+  const response = await fetch(`${API}/colecciones?idioma=${encodeURIComponent(language)}`)
   if (!response.ok) throw new Error(`Unable to load collections (${response.status})`)
   const data = await response.json()
   return Array.isArray(data) ? data : data.colecciones || []
