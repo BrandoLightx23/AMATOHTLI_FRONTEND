@@ -4,7 +4,9 @@ import { useLanguage } from "../../context/useLanguage"
 import Memorama from "./Memorama"
 import MatchPiece from "./MatchPiece"
 import MuseoMatch from "./MuseoMatch"
-import { Gamepad2, Award, Zap, Puzzle } from "lucide-react"
+import GuessCulture from "./GuessCulture"
+import WhereFrom from "./WhereFrom"
+import { Gamepad2, Award, Zap, Puzzle, Shapes, MapPin } from "lucide-react"
 
 export default function GameHub() {
   const { activeGame, setActiveGame } = useContext(AppContext)
@@ -14,6 +16,8 @@ export default function GameHub() {
   if (activeGame === "memorama") return <Memorama />
   if (activeGame === "match_piece") return <MatchPiece />
   if (activeGame === "museo_match") return <MuseoMatch />
+  if (activeGame === "guess_culture") return <GuessCulture />
+  if (activeGame === "where_from") return <WhereFrom />
 
   return (
     <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-8" style={{ background: "#f5f0e8" }}>
@@ -32,7 +36,7 @@ export default function GameHub() {
       </div>
 
       {/* Grid de Juegos */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full max-w-5xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full max-w-5xl">
         
         {/* Tarjeta Juego 1: Memorama */}
         <div className="bg-white border border-[#d9d0bc] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
@@ -91,8 +95,47 @@ export default function GameHub() {
           </button>
         </div>
 
+        {/* Tarjeta Juego 4: Adivina la cultura */}
+        <div className="bg-white border border-[#d9d0bc] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+          <div>
+            <div className="w-12 h-12 bg-[#eaf0ec] text-[#2d6a5a] rounded-xl flex items-center justify-center mb-4 border border-[#2d6a5a]/20">
+              <Shapes size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-[#2c2416] mb-2">{t("hub.guess.title")}</h3>
+            <p className="text-xs text-[#7a6e5f] leading-relaxed mb-6">
+              {t("hub.guess.desc")}
+            </p>
+          </div>
+          <button
+            onClick={() => setActiveGame("guess_culture")}
+            className="w-full py-3 px-4 bg-[#2d6a5a] hover:bg-[#1e4d40] text-white rounded-xl text-xs font-bold transition-colors shadow-sm cursor-pointer"
+          >
+            {t("hub.guess.btn")}
+          </button>
+        </div>
+
+        {/* Tarjeta Juego 5: De donde es */}
+        <div className="bg-white border border-[#d9d0bc] rounded-2xl p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+          <div>
+            <div className="w-12 h-12 bg-[#fff6e6] text-[#c9830a] rounded-xl flex items-center justify-center mb-4 border border-[#c9830a]/20">
+              <MapPin size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-[#2c2416] mb-2">{t("hub.where.title")}</h3>
+            <p className="text-xs text-[#7a6e5f] leading-relaxed mb-6">
+              {t("hub.where.desc")}
+            </p>
+          </div>
+          <button
+            onClick={() => setActiveGame("where_from")}
+            className="w-full py-3 px-4 bg-[#c9830a] hover:bg-[#b87208] text-white rounded-xl text-xs font-bold transition-colors shadow-sm cursor-pointer"
+          >
+            {t("hub.where.btn")}
+          </button>
+        </div>
+
       </div>
 
     </div>
   )
 }
+
