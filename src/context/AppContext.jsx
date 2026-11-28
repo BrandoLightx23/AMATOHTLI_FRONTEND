@@ -1,3 +1,4 @@
+successfully downloaded text file (SHA: 8cf399425f1f655955e4aa11ca671ee935e6596e)
 import { createContext, useState, useEffect, useMemo, useCallback } from "react"
 import { getObjects, getCollections } from "../api/api"
 import { UNKNOWN_YEAR } from "../constants"
@@ -73,7 +74,7 @@ export function AppProvider({ children }) {
       setLoading(true)
       try {
         const [data, collectionsData] = await Promise.all([
-          getObjects(lang),
+          getObjects(null, {}, lang),
           getCollections(lang).catch(err => {
             console.error("Error al cargar las colecciones:", err)
             return []

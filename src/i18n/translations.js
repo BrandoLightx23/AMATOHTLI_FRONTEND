@@ -1,3 +1,4 @@
+successfully downloaded text file (SHA: 63991373288576d40934fad0be1385a0deb8dd09)
 // Diccionario de textos de la interfaz:D
 
 
@@ -103,6 +104,17 @@ const es = {
   "col.page": "Página",
   "col.of": "de",
   "col.showing": "Mostrando {n} objetos",
+  "col.region": "Región:",
+  "col.allRegions": "Todas",
+  "col.yearFrom": "Desde (año):",
+  "col.yearTo": "Hasta (año):",
+  "col.withoutDate": "Sin fecha",
+  "col.clearFilters": "Limpiar filtros",
+  "detail.description": "Descripción:",
+  "detail.viewMuseum": "Ver en el museo",
+  "detail.viewCommons": "Ver en Wikimedia Commons",
+  "detail.viewHighRes": "Ver imagen en alta resolución",
+  "detail.noData": "Sin dato",
 
   "detail.inventoryNo": "Nº Inventario: {value}",
   "detail.region": "Región / Procedencia:",
@@ -385,6 +397,17 @@ const en = {
   "col.page": "Page",
   "col.of": "of",
   "col.showing": "Showing {n} objects",
+  "col.region": "Region:",
+  "col.allRegions": "All",
+  "col.yearFrom": "From (year):",
+  "col.yearTo": "To (year):",
+  "col.withoutDate": "No date",
+  "col.clearFilters": "Clear filters",
+  "detail.description": "Description:",
+  "detail.viewMuseum": "View at the museum",
+  "detail.viewCommons": "View on Wikimedia Commons",
+  "detail.viewHighRes": "View high-resolution image",
+  "detail.noData": "No data",
 
  
   "detail.inventoryNo": "Inventory No.: {value}",
@@ -569,4 +592,5 @@ const de = {
 }
 
 export const translations = { es, en, de }
+
 
