@@ -7,7 +7,9 @@ import { SUPPORTED_LANGS } from "../context/languageCore"
 const JUEGOS = [
   { id: "memorama" },
   { id: "match_piece" },
-  { id: "museo_match" }
+  { id: "museo_match" },
+  { id: "guess_culture" },
+  { id: "where_from" }
 ]
 
 // SVG estático para evitar el error de removeChild con arrays dentro de SVG
