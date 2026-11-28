@@ -1,24 +1,23 @@
-const SHORT_NAMES = {
-  "anne-marie-und-caspar-reinhart-collection-at-museum-rietberg-zurich": "Rietberg",
-  "pre-columbian-art-in-the-birmingham-museum-of-art": "Birmingham",
-  "mayan-art-in-the-cleveland-museum-of-art": "Cleveland · Maya",
-  "pre-columbian-metalwork-in-the-cleveland-museum-of-art": "Cleveland · Metalurgia",
-  "pre-columbian-art-in-the-los-angeles-county-museum-of-art": "LACMA",
-  "pre-columbian-art-in-the-metropolitan-museum-of-art": "Metropolitan",
-  "pre-columbian-art-in-the-historisches-museum-bern": "Bern",
+function shortName(collection) {
+  const n = (collection.nombre || "").toLowerCase()
+  if (n.includes("rietberg")) return "Rietberg"
+  if (n.includes("birmingham")) return "Birmingham"
+  if (n.includes("mayan art in the cleveland")) return "Cleveland · Maya"
+  if (n.includes("metalwork in the cleveland")) return "Cleveland · Metalurgia"
+  if (n.includes("los angeles")) return "LACMA"
+  if (n.includes("metropolitan")) return "Metropolitan"
+  if (n.includes("historisches museum bern")) return "Bern"
+  return collection.nombre
 }
 
 export default function ColeccionSelector({ collections, total, selectedSlug, onChange, t }) {
   const options = [
     { slug: "", nombre: t("col.allCollections", { n: total }), full: "" },
-    ...collections.map(collection => {
-      const short = SHORT_NAMES[collection.slug] || collection.nombre
-      return {
-        slug: collection.slug,
-        nombre: `${short} (${collection.total})`,
-        full: collection.nombre,
-      }
-    }),
+    ...collections.map(collection => ({
+      slug: collection.slug,
+      nombre: `${shortName(collection)} (${collection.total})`,
+      full: collection.nombre,
+    })),
   ]
 
   return (
