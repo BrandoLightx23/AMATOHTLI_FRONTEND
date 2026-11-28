@@ -92,6 +92,8 @@ const es = {
 
   "col.title": "CATÁLOGO DE LA COLECCIÓN",
   "col.subtitle": "Explora los {n} objetos históricos catalogados. Filtra por cultura, material o realiza búsquedas en tiempo real.",
+  "col.collectionSelector": "Seleccionar colección",
+  "col.allCollections": "Todas las colecciones ({n})",
   "col.searchPlaceholder": "Buscar título, procedencia o inventario...",
   "col.culture": "Cultura:",
   "col.material": "Material:",
@@ -349,6 +351,8 @@ const en = {
 
   "col.title": "COLLECTION CATALOG",
   "col.subtitle": "Explore the {n} cataloged historical objects. Filter by culture, material, or search in real time.",
+  "col.collectionSelector": "Select collection",
+  "col.allCollections": "All collections ({n})",
   "col.searchPlaceholder": "Search title, provenance or inventory...",
   "col.culture": "Culture:",
   "col.material": "Material:",
@@ -513,4 +517,9 @@ const en = {
   "mm.tileAlt": "Museum tile",
 }
 
-export const translations = { es, en }
+const de = {
+  "col.collectionSelector": "Sammlung auswählen",
+  "col.allCollections": "Alle Sammlungen ({n})",
+}
+
+export const translations = { es, en, de }

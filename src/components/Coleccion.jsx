@@ -2,13 +2,19 @@ import { useState, useContext, useMemo } from "react"
 import { AppContext } from "../context/AppContext"
 import { useLanguage } from "../context/useLanguage"
 import MuseumImage from "./MuseumImage"
+import ColeccionSelector from "./ColeccionSelector"
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, X } from "lucide-react"
 
 // Valores internos (independientes del idioma) para la opción "todos" de los filtros
 const ALL = "__all__"
 
 export default function Coleccion() {
-  const { allObjects } = useContext(AppContext)
+  const {
+    allObjects,
+    collections,
+    selectedCollectionSlug,
+    setSelectedCollectionSlug,
+  } = useContext(AppContext)
   const { t, formatYear } = useLanguage()
   
   // Estados locales para filtrado y paginación
@@ -43,10 +49,21 @@ export default function Coleccion() {
 
   // Si cambia el idioma, algunas opciones cambian de texto: volver a "todas" si la elegida ya no existe
   const activeCulture = cultures.includes(selectedCulture) ? selectedCulture : ALL
+  const activeCollection = collections.find(collection => collection.slug === selectedCollectionSlug)
+  const collectionNames = useMemo(
+    () => new Map(collections.map(collection => [String(collection.id), collection.nombre])),
+    [collections]
+  )
+  const getCollectionName = (obj) =>
+    collectionNames.get(String(obj.coleccion_id)) || obj.coleccion_nombre || obj.coleccion?.nombre || ""
 
   // Filtrado de objetos en memoria (extremadamente rápido)
+  const collectionObjects = useMemo(() => activeCollection
+    ? allObjects.filter(obj => String(obj.coleccion_id) === String(activeCollection.id))
+    : allObjects, [allObjects, activeCollection])
+
   const filteredObjects = useMemo(() => {
-    return allObjects.filter(obj => {
+    return collectionObjects.filter(obj => {
       const matchSearch = searchTerm === "" || 
         (obj.titulo || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (obj.lugar_origen || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -59,7 +76,7 @@ export default function Coleccion() {
 
       return matchSearch && matchCulture && matchMaterial
     })
-  }, [allObjects, searchTerm, activeCulture, selectedMaterial])
+  }, [collectionObjects, searchTerm, activeCulture, selectedMaterial])
 
   // Reiniciar a la página 1 cuando cambian los filtros
   const handleFilterChange = (type, value) => {
@@ -85,12 +102,25 @@ export default function Coleccion() {
           {t("col.title")}
         </h2>
         <p className="text-xs text-[#7a6e5f]">
-          {t("col.subtitle", { n: allObjects.length })}
+          {t("col.subtitle", { n: collectionObjects.length })}
         </p>
       </div>
 
       {/* Controles de Búsqueda y Filtro */}
       <div className="bg-[#ede8dc] border border-[#d9d0bc] rounded-2xl p-4 flex flex-wrap items-center gap-4 mb-6 shadow-sm">
+        <div className="basis-full">
+          <ColeccionSelector
+            collections={collections}
+            total={allObjects.length}
+            selectedSlug={activeCollection?.slug || ""}
+            t={t}
+            onChange={(slug) => {
+              setSelectedCollectionSlug(slug)
+              setSearchTerm("")
+              setCurrentPage(1)
+            }}
+          />
+        </div>
         
         {/* Buscador */}
         <div className="min-w-0 basis-full sm:basis-auto sm:flex-1 sm:min-w-[260px] bg-white border border-[#d9d0bc] rounded-xl px-4 py-2.5 flex items-center gap-2">
@@ -162,6 +192,11 @@ export default function Coleccion() {
                   <p className="text-[10px] uppercase font-extrabold text-[#c9830a] tracking-widest truncate">
                     {obj.estilo_cultura || t("common.mesoamerica")}
                   </p>
+                  {getCollectionName(obj) && (
+                    <span className="inline-block max-w-full mt-1 px-2 py-0.5 rounded-full bg-[#eaf0ec] text-[#2d6a5a] text-[9px] font-bold border border-[#c2d9cc] truncate">
+                      {getCollectionName(obj)}
+                    </span>
+                  )}
                   <h4 className="text-sm font-bold text-[#2c2416] line-clamp-2 leading-snug mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
                     {obj.titulo}
                   </h4>
@@ -235,6 +270,11 @@ export default function Coleccion() {
                 </h3>
 
                 <div className="flex flex-wrap gap-2 mb-4">
+                  {getCollectionName(detailedObject) && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#eaf0ec] text-[#2d6a5a] text-[10px] font-bold border border-[#c2d9cc]">
+                      {getCollectionName(detailedObject)}
+                    </span>
+                  )}
                   <span className="px-2.5 py-0.5 rounded-full bg-[#eaf0ec] text-[#2d6a5a] text-[10px] font-bold border border-[#c2d9cc]">
                     {detailedObject.estilo_cultura || t("common.unknownCulture")}
                   </span>
