@@ -43,11 +43,11 @@ const es = {
 
   "timeline.title": "Línea del Tiempo",
   "timeline.unknownShort": "Desconocida",
-  "period.early": "Antigüedad Temprana (400–900)",
-  "period.classic": "Clásico (1000–1500)",
-  "period.earlyPost": "Posclásico Temprano (1600–1700)",
-  "period.latePost": "Posclásico Tardío (1800–2000)",
-
+  "period.early": "Preclásico y Horizonte Temprano (2000 a. C.–200 d. C.)",
+  "period.classic": "Clásico e Intermedio Temprano (200–900 d. C.)",
+  "period.earlyPost": "Posclásico Temprano y Horizonte Medio (900–1200 d. C.)",
+  "period.latePost": "Posclásico Tardío y Horizonte Tardío (1200–1521/1533 d. C.)",
+  
   "info.empty": "Selecciona un marcador en el mapa para ver información sobre la cultura, región u objeto.",
   "info.tipTitle": "Consejo",
   "info.tip": "Explora diferentes períodos para descubrir cómo cambió el arte precolombino a lo largo del tiempo.",
@@ -297,11 +297,11 @@ const en = {
  
   "timeline.title": "Timeline",
   "timeline.unknownShort": "Unknown",
-  "period.early": "Early Antiquity (400–900)",
-  "period.classic": "Classic (1000–1500)",
-  "period.earlyPost": "Early Postclassic (1600–1700)",
-  "period.latePost": "Late Postclassic (1800–2000)",
-
+  "period.early": "Preclassic & Early Horizon (2000 BCE–200 CE)",
+  "period.classic": "Classic & Early Intermediate (200–900 CE)",
+  "period.earlyPost": "Early Postclassic & Middle Horizon (900–1200 CE)",
+  "period.latePost": "Late Postclassic & Late Horizon (1200–1521/1533 CE)",
+  
   "info.empty": "Select a marker on the map to see information about the culture, region or object.",
   "info.tipTitle": "Tip",
   "info.tip": "Explore different periods to discover how pre-Columbian art changed over time.",
