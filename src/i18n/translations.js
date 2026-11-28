@@ -1,4 +1,3 @@
-successfully downloaded text file (SHA: 63991373288576d40934fad0be1385a0deb8dd09)
 // Diccionario de textos de la interfaz:D
 
 
